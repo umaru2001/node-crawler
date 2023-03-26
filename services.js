@@ -1,9 +1,15 @@
 const cheerio = require('cheerio');
 const express = require('express');
-const app = express();
 const http = require('http');
-const superagent = require('superagent')
-require('superagent-charset')(superagent)
+
+function responseArticle(response, title, origin, time, content) {
+  response && response.send({
+    title,
+    origin,
+    time,
+    content,
+  });
+}
 
 async function getTestArticle(response) {
 
@@ -15,9 +21,9 @@ async function getTestArticle(response) {
       let $ = cheerio.load(htmlStr);
       const title = $($('.d2txt.clearfix > h1')[0]).text();
       const subTitle = $($('.d2txt.clearfix > .d2txt_1.clearfix')[0]).text().split(' ');
-      const [origin, time] = [subTitle[0].trim(), subTitle[subTitle.length - 1].trim()];
+      const [origin, time] = [subTitle[0].split('：')[1].trim(), subTitle[subTitle.length - 1].split('：')[1].trim()];
       const content = $($('.d2txt.clearfix > .d2txt_con.clearfix')[0]).html().trim();
-      response && response.send(content);
+      responseArticle(response, title, origin, time, content);
     });
   })
 
