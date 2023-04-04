@@ -112,5 +112,3 @@ class Neo4jDB {
 }
 
 module.exports = Neo4jDB;
-
-
