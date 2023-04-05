@@ -19,7 +19,7 @@
     "express": "^4.15.3",
     "http": "0.0.1-security",
     "iconv-lite": "^0.4.15",
-    "mysql": "^2.13.0",
+    "mysql": "^2.18.1",
     "n3": "^1.16.4",
     "neo4j-driver": "^5.7.0",
     "nodejieba": "^2.6.0",

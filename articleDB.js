@@ -6,18 +6,64 @@ const pool = mysql.createPool({
   connectionLimit: 10,
   host: 'localhost',
   user: 'root',
-  password: 'password',
+  password: '123456xy',
   database: 'politics',
 });
+
+process.on('exit', () => {
+  // 在程序退出时调用 pool.end()
+  pool.end();
+});
+
+function generateRandomId() {
+  // 获取当前日期
+  let currentDate = new Date();
+  let year = currentDate.getFullYear();
+  let month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+  let day = currentDate.getDate().toString().padStart(2, '0');
+
+  // 生成随机的后4位数字
+  let randomNum = Math.floor(Math.random() * 10000)
+    .toString()
+    .padStart(4, '0');
+
+  // 拼接生成的 ID
+  let id = `${year}${month}${day}${randomNum}`;
+  return id;
+}
+
+const timerMap = new Map();
 
 // 封装查询函数
 function query(sql, values) {
   return new Promise((resolve, reject) => {
-    pool.query(sql, values, (error, results, fields) => {
+    pool.getConnection((error, connection) => {
+
+      if (!timerMap.has(connection.threadId)) {
+        timerMap.set(connection.threadId, null);
+      }
+      let timer = timerMap.get(connection.threadId);
+      if (timer) {
+        clearTimeout(timer);
+      }
+
+      // 获取一个数据库连接
       if (error) {
         reject(error);
       } else {
-        resolve(results);
+        // 执行查询操作
+        connection.query(sql, values, (error, results, fields) => {
+          if (error) {
+              reject(error);
+          } else {
+              resolve(results);
+          }
+          connection.release(); // 释放数据库连接
+          // 在查询完成后开始定时器
+          timer = setTimeout(() => {
+              connection.destroy(); // 销毁数据库连接
+          }, 60000); // 设置定时器时间为 1 分钟
+        });
       }
     });
   });
@@ -25,8 +71,9 @@ function query(sql, values) {
 
 // 封装插入函数
 async function insert(article) {
+  const id = article.id ? article.id : generateRandomId();
   const sql = 'INSERT INTO articles(id, title, origin, time, content) VALUES (?, ?, ?, ?, ?)';
-  const values = [article.id, article.title, article.origin, article.time, article.content];
+  const values = [id, article.title, article.origin, article.time, article.content];
   await query(sql, values);
 }
 
@@ -34,6 +81,35 @@ async function insert(article) {
 async function update(article) {
   const sql = 'UPDATE articles SET title = ?, origin = ?, time = ?, content = ? WHERE id = ?';
   const values = [article.title, article.origin, article.time, article.content, article.id];
+  await query(sql, values);
+}
+
+// 封装更新某字段函数
+async function updateField(id, field, value) {
+  let sql;
+  let values;
+
+  switch (field) {
+    case 'title':
+      sql = 'UPDATE articles SET title = ? WHERE id = ?';
+      values = [value, id];
+      break;
+    case 'origin':
+      sql = 'UPDATE articles SET origin = ? WHERE id = ?';
+      values = [value, id];
+      break;
+    case 'time':
+      sql = 'UPDATE articles SET time = ? WHERE id = ?';
+      values = [value, id];
+      break;
+    case 'content':
+      sql = 'UPDATE articles SET content = ? WHERE id = ?';
+      values = [value, id];
+      break;
+    default:
+      throw new Error('Invalid field');
+  }
+
   await query(sql, values);
 }
 
@@ -66,4 +142,6 @@ module.exports = {
   del,
   findAll,
   findById,
+  updateField,
+  generateRandomId,
 };
