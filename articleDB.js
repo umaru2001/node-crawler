@@ -16,21 +16,14 @@ process.on('exit', () => {
 });
 
 function generateRandomId() {
-  // 获取当前日期
-  let currentDate = new Date();
-  let year = currentDate.getFullYear();
-  let month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-  let day = currentDate.getDate().toString().padStart(2, '0');
-
-  // 生成随机的后4位数字
-  let randomNum = Math.floor(Math.random() * 10000)
-    .toString()
-    .padStart(4, '0');
-
-  // 拼接生成的 ID
-  let id = `${year}${month}${day}${randomNum}`;
-  return id;
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  const random = Math.random().toString(36).replace(/0\./, '').substring(0, 4);
+  return `${year}${month}${day}${random}`;
 }
+
 
 const timerMap = new Map();
 
