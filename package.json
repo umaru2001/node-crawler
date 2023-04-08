@@ -10,6 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@tensorflow/tfjs-converter": "^4.4.0",
+    "@tensorflow/tfjs-node": "^4.4.0",
     "async": "^2.5.0",
     "bufferhelper": "^0.2.1",
     "cheerio": "^0.22.0",
