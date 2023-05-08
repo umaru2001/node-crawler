@@ -1,7 +1,7 @@
 const tf = require('@tensorflow/tfjs-node');
-const { loadGraphModel } = require('@tensorflow/tfjs-converter');
+const { load } = require('@tensorflow/tfjs-converter');
 
-const modelPath = 'https://huggingface.co/bert-base-chinese/resolve/main/model.json';
+const modelPath = 'https://huggingface.co/bert-base-chinese/blob/main/tokenizer.json';
 
 async function extractTriple(text) {
   // 加载BERT模型
