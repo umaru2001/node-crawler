@@ -86,31 +86,31 @@ const location_is_any = [
     ['兵马俑', '是', '中国的文化遗产'],
 ];
 
-// const neo4j = new Neo4jDB();
+const neo4j = new Neo4jDB();
 
-// const createRelation = (fromName, toName, fromLabel, toLabel, relation) => {
-//   neo4j.createNode(fromLabel, { name: fromName }, () => {
-//     console.log('创建', fromName, '节点成功！');
-//     neo4j.createNode(toLabel, { name: toName }, () => {
-//       console.log('创建', toName, '节点成功！');
-//       neo4j.createRelationshipByName(fromName, toName, fromLabel, toLabel, relation, () => {
-//         console.log('创建', fromName, toName, '关系成功！');
-//       });
-//     });
-//   });
-// }
+const createRelation = (fromName, toName, fromLabel, toLabel, relation) => {
+  neo4j.createNode(fromLabel, { name: fromName }, () => {
+    console.log('创建', fromName, '节点成功！');
+    neo4j.createNode(toLabel, { name: toName }, () => {
+      console.log('创建', toName, '节点成功！');
+      neo4j.createRelationshipByName(fromName, toName, fromLabel, toLabel, relation, () => {
+        console.log('创建', fromName, toName, '关系成功！');
+      });
+    });
+  });
+}
 
-// const generateKG = () => {
-//   const sub_label = "location";
-//   const obj_label = "any";
-//   const relation = "is";
-//   location_is_any.forEach(rdf => {
-//     const [subjective, _relation, objective] = rdf;
-//     createRelation(subjective, objective, sub_label, obj_label, relation);
-//   })
-// }
+const generateKG = () => {
+  const sub_label = "action";
+  const obj_label = "importance";
+  const relation = "is";
+  location_is_any.forEach(rdf => {
+    const [subjective, _relation, objective] = rdf;
+    createRelation(subjective, objective, sub_label, obj_label, relation);
+  })
+}
 
-// generateKG();
+generateKG();
 
 const stream = fs.createWriteStream('dict.txt'); // 创建可写流
 

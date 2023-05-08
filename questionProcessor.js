@@ -19,10 +19,11 @@ function removeDuplicate(arr) {
 
 function wordAnalysis(response, sentence) {
   const neo4j = new Neo4jDB();
-  const result = nodejieba.textRankExtract(sentence, 2);
-  const keyword1 = result[0].word;
-  const keyword2 = result[1].word;
-  neo4j.getConnectedNodeByNames(keyword1, keyword2, (nodes) => {
+  const result = nodejieba.extract(sentence, 2);
+  console.log(result)
+  const keyword1 = result[0]?.word;
+  const keyword2 = result[1]?.word;
+  neo4j.getConnectedNodeByNames(keyword1 || '', keyword2 || '', (nodes) => {
     const processedNodes = removeDuplicate(nodes);
     const returnWords = []
     processedNodes.forEach(node => {

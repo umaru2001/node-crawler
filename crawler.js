@@ -11,8 +11,10 @@ const MAX_PAGES = 10; // 最大爬取页数
 
 let currentPage = 1;
 let totalLinks = [];
+let completed = 0;
 
 for (let i = 1; i <= 8; i++) {
+
   const options = {
     hostname: 'jhsjk.people.cn',
     path: `/testnew/result?keywords=&isFuzzy=0&searchArea=0&year=0&form=0&type=105&page=${i}&origin=%E5%85%A8%E9%83%A8&source=2`,
@@ -31,10 +33,27 @@ for (let i = 1; i <= 8; i++) {
       const jsonData = JSON.parse(data);
       const articleIds = jsonData.list.map((item) => item.article_id);
       const urls = articleIds.map((id) => `http://jhsjk.people.cn/article/${id}?isindex=1`);
-      const content = urls.join('\n');
+      const content = `${urls.join('\n')}\n`;
       fs.appendFile('article_urls.txt', content, (err) => {
         if (err) throw err;
         console.log(`Page ${i} urls are saved in file.`);
+        completed++;
+        if (completed === 8) {
+          const rl = readline.createInterface({
+            input: fs.createReadStream('./article_urls.txt'),
+            crlfDelay: Infinity,
+          });
+
+          async function processLineByLine() {
+            for await (const line of rl) {
+              await getTestArticle(line.trim());
+            }
+          }
+
+          processLineByLine().catch((err) => {
+            console.error(err);
+          });
+        }
       });
     });
   });
@@ -45,22 +64,6 @@ for (let i = 1; i <= 8; i++) {
 
   req.end();
 }
-
-const rl = readline.createInterface({
-  input: fs.createReadStream('./article_urls.txt'),
-  crlfDelay: Infinity,
-});
-
-async function processLineByLine() {
-  for await (const line of rl) {
-    await getTestArticle(line.trim());
-  }
-}
-
-processLineByLine().catch((err) => {
-  console.error(err);
-});
-
 
 async function getTestArticle(url) {
   const req = http.request(url, (res) => {
@@ -132,7 +135,3 @@ async function crawlAllPages() {
   console.log(`Crawling done. Total links: ${totalLinks.length}`);
   return totalLinks;
 }
-
-
-
-
